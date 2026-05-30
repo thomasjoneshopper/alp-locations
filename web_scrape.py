@@ -3,6 +3,13 @@ import json
 
 # from source:
 #
+# "bounds": {
+#       "west": -151.05376,
+#       "south": 25.76312,
+#       "east": -68.40191,
+#       "north": 64.86018
+#     }
+#
 # "max_results": 100
 # 
 # "radius_options": [
@@ -14,7 +21,7 @@ import json
 #     ]
 
 
-def get_alp_locations(longitude: float, latitude: float, distance: int) -> list[dict]:
+def get_alp_locations(longitude: float, latitude: float, distance: int = 250) -> list[dict[str, any]]:
     """Finds 100 closest alp locations within the specified radius"""
     headers = {
         'accept': '*/*',
@@ -41,4 +48,5 @@ def get_alp_locations(longitude: float, latitude: float, distance: int) -> list[
     }
 
     response = requests.get('https://stockist.co/api/v1/map_pqkj57y3/locations/search', params=params, headers=headers)
+
     return json.loads(response.text).get('locations')

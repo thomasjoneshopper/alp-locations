@@ -1,9 +1,20 @@
 from web_scrape import *
 import tabulate as tbl
+import random
+import time
 
-locations = get_alp_locations(longitude=-96.7943025, latitude=32.8333535, distance=250)
 
-headers = ['id', 'name', 'distance']
-data = [[location.get('id'), location.get('name'), location.get('distance')] for location in locations]
-print(tbl.tabulate(data, headers=headers, tablefmt="simple", showindex=True, floatfmt='.1f'))
+for i in range(100):
+    lon = random.uniform(-151.05376, -68.40191)
+    lat = random.uniform(25.76312, 64.86018)
+    locations = get_alp_locations(longitude=lon, latitude=lat, distance=100)
+    
+    time.sleep(random.uniform(.6, 1))
+
+    if locations == None:
+        print(f'{f'({i})':>5} locations not found')
+        continue
+
+    print(f'{f'({i})':>5} {len(locations):>3} location{'' if len(locations) == 1 else 's'} found')
+    
 
