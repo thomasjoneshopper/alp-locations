@@ -5,16 +5,19 @@ import random
 import requests
 import time
 
+def clean(s: str) -> str:
+    return str(s).replace(',','').replace('\n','').replace('\"', '\'')
+
 class Location:
     def __init__(self, data: dict):
-        self.id: str = data.get('id','').replace(',','').replace('\n','')
-        self.name: str = data.get('name','').replace(',','').replace('\n','')
+        self.id: str = clean(data.get('id'))
+        self.name: str = clean(data.get('name'))
         self.lat: float = data.get('latitude')
         self.lon: float = data.get('longitude')
-        self.address: str = data.get('address_line_1','').replace(',','').replace('\n','')
-        self.city: str = data.get('city','').replace(',','').replace('\n','')
-        self.state: str = data.get('state','').replace(',','').replace('\n','')
-        self.zip: str = data.get('postal_code','').replace(',','').replace('\n','')
+        self.address: str = clean(data.get('address_line_1'))
+        self.city: str = clean(data.get('city'))
+        self.state: str = clean(data.get('state'))
+        self.zip: str = clean(data.get('postal_code'))
 
     def __eq__(self, other):
         if not isinstance(other, Location): return NotImplemented
@@ -110,5 +113,6 @@ def main():
         for l in locations:
             f.write(l.csv())
     print(f'completed {call_ct} requests in {(time.time()-start_time)/60:.2f} minutes')
+   
 
 if __name__ == '__main__': main()
