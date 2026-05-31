@@ -1,15 +1,24 @@
+import datetime as dt
 from geopy.distance import geodesic
 import json
+import logging
 import math
 import random
 import requests
 import time
 
-def clean(s: str) -> str:
-    return str(s).replace(',','').replace('\n','').replace('\"', '\'')
+logging.basicConfig(
+    filename="alp_locations.log",
+    filemode="w",
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s"
+)
 
 class Location:
     def __init__(self, data: dict):
+        def clean(s: str) -> str:
+            return str(s).replace(',','').replace('\n','').replace('\"', '\'')
+        
         self.id: str = clean(data.get('id'))
         self.name: str = clean(data.get('name'))
         self.lat: float = data.get('latitude')
@@ -66,7 +75,7 @@ def get_alp_locations(lon: float, lat: float, distance: int = 50000) -> set[Loca
     response = requests.get('https://stockist.co/api/v1/map_pqkj57y3/locations/search', params=params, headers=headers)
     locations_json = json.loads(response.text).get('locations')
     while locations_json == None:
-        print("Request failed. Waiting 60 seconds")
+        logging.error("Request failed. Waiting 60 seconds")
         time.sleep(60)
         response = requests.get('https://stockist.co/api/v1/map_pqkj57y3/locations/search', params=params, headers=headers)
         locations_json = json.loads(response.text).get('locations')
@@ -85,14 +94,14 @@ def get_alp_locations(lon: float, lat: float, distance: int = 50000) -> set[Loca
 #       "north": 64.86018
 #     }
 
-# roughly 42 by 84
+# roughly 42 deg by 84 deg
 
 def search_tile(lon, lat, side_length, depth=0):
     """ Recursively search for locations in tile """
     distance = int(geodesic((lat, lon),(lat + side_length*math.sqrt(2)/2, lon + side_length*math.sqrt(2)/2)).miles)
-    print(f'{depth*'  '}({call_ct}) searching {distance} mile radius at ({lon:.2f}, {lat:.2f})... ', end='', flush=True)
+    logging.debug(f'({call_ct}) searching {distance} mile radius at ({lon:.2f}, {lat:.2f})... ')
     locations = get_alp_locations(lon, lat, distance)
-    print(f'found {len(locations)} locations')
+    logging.debug(f'({call_ct-1}) found {len(locations)} locations')
     
     if len(locations) == 100:
         # location cap is hit - subdivide tile into four subtiles
@@ -104,14 +113,17 @@ def search_tile(lon, lat, side_length, depth=0):
 
 def main():
     start_time = time.time()
+    logging.debug(f'Scraping alp locations at {dt.datetime.now():%H:%M:%S on %m-%d-%y}')
 
     locations = search_tile(-89,46,42)
     locations |= search_tile(-131,46,42)
 
-    print(f'\nfound {len(locations)} locations')
-    with open('locations.csv', 'w') as f:
+    with open('log.txt', 'w') as log:
+        log.write(f'\nfound {len(locations)} locations')
+    with open(f'data/alp_locations_{dt.date.today().strftime('%m-%d-%Y')}.csv', 'w') as f:
         for l in locations:
             f.write(l.csv())
+    
     print(f'completed {call_ct} requests in {(time.time()-start_time)/60:.2f} minutes')
    
 
