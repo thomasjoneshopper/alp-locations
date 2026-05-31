@@ -1,0 +1,8 @@
+[Unit]
+Description=Scrape alp locations on a daily basis
+
+[Service]
+Type=oneshot
+User=thomas
+WorkingDirectory=/home/thomas/alp_locations
+ExecStart=/home/thomas/alp_locations/.venv/bin/python /home/thomas/alp_locations/main.py

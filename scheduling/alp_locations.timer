@@ -1,0 +1,10 @@
+[Unit]
+Description=Run alp locations scraper every day
+
+[Timer]
+OnBootSec=1min
+OnCalendar=*-*-* 08:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
